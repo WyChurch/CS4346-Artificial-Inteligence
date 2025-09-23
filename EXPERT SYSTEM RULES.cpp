@@ -1,3 +1,5 @@
+//------DIAGNOSIS-------
+
 //SCHIZOPHRENIA
 
 //RULE 10
@@ -159,3 +161,136 @@ IF depressive_episodes = true
 AND quickly_annoyed = true
 AND no_appetite = true
 THEN diagnosis = DYSTHYMIA
+
+// -------TREATMENT-------
+
+//SCHIZOPHRENIA
+
+//RULE 240
+IF diagnosis = Schizophrenia
+AND treatment_needed = true
+THEN treatment = Antipsychotics_Aripiprazole_Olanzapine
+
+//RULE 250
+IF diagnosis = Schizophrenia
+AND treatment_needed = true
+THEN treatment = Individual_Therapy AND Family_Therapy
+
+//RULE 260
+IF diagnosis = Schizophrenia
+AND treatment_needed = true
+THEN treatment = Social_Skills_Therapy
+
+//MAJOR DEPRESSIVE DISORDER
+
+//RULE 270
+IF diagnosis = Major_Depressive_Disorder
+AND treatment_needed = true
+THEN treatment = SSRIs_SNRIs AND Tricyclics
+
+//RULE 280
+IF diagnosis = Major_Depressive_Disorder
+AND treatment_needed = true
+THEN treatment = Psychotherapy AND Interpersonal_Therapy
+
+//RULE 290
+IF diagnosis = Major_Depressive_Disorder
+AND treatment_needed = true
+THEN treatment = Exercise AND Sleep_hygiene
+
+//PANIC DISORDER WITH AGORAPHOBIA
+
+//RULE 300
+IF diagnosis = Panic_Disorder_with_Agoraphobia
+AND treatment_needed = true
+THEN treatment = Antidepressants AND Anti_anxiety_medicine
+
+//RULE 310
+IF diagnosis = Panic_Disorder_with_Agoraphobia
+AND treatment_needed = true
+THEN treatment = Psychotherapy
+
+//RULE 320
+IF diagnosis = Panic_Disorder_with_Agoraphobia
+AND treatment_needed = true
+THEN treatment = Calming_skills AND Gradual_exposure
+
+//BIPOLAR DISORDER
+
+//RULE 330
+IF diagnosis = Bipolar_Disorder
+AND treatment_needed = true
+THEN treatment = Mood_stabilizers AND Antidepressants_Antipsychotics
+
+//RULE 340
+IF diagnosis = Bipolar_Disorder
+AND treatment_needed = true
+THEN treatment = Cognitive_Behavioral_Therapy AND Psychoeducation
+
+//RULE 350
+IF diagnosis = Bipolar_Disorder
+AND treatment_needed = true
+THEN treatment = Regular_sleep AND Support_systems
+
+//GENERALIZED ANXIETY DISORDER
+
+//RULE 360
+IF diagnosis = Generalized_Anxiety_Disorder
+AND treatment_needed = true
+THEN treatment = SSRIs_SNRIs AND Buspirone
+
+//RULE 370
+IF diagnosis = Generalized_Anxiety_Disorder
+AND treatment_needed = true
+THEN treatment = Stress_reduction_techniques
+
+//SCHIZO-AFFECTIVE DISORDER
+
+//RULE 380
+IF diagnosis = Schizoaffective_Disorder
+AND treatment_needed = true
+THEN treatment = Antipsychotics_Paliperidone
+
+//RULE 390
+IF diagnosis = Schizoaffective_Disorder
+AND treatment_needed = true
+THEN treatment = Individual_Therapy AND Family_Therapy
+
+//RULE 400
+IF diagnosis = Schizoaffective_Disorder
+AND treatment_needed = true
+THEN treatment = Social_Skills_Therapy
+
+//DISSOCIATIVE IDENTITY DISORDER
+
+//RULE 410
+IF diagnosis = Dissociative_Identity_Disorder
+AND treatment_needed = true
+THEN treatment = Psychotherapy AND Family_Therapy
+
+//RULE 420
+IF diagnosis = Dissociative_Identity_Disorder
+AND treatment_needed = true
+THEN treatment = Hypnotherapy
+
+//RULE 430
+IF diagnosis = Dissociative_Identity_Disorder
+AND treatment_needed = true
+THEN treatment = Antidepressants_if_Depression AND Anti_anxiety_if_Anxiety
+
+//DYSTHYMIA
+
+//RULE 440
+IF diagnosis = Dysthymia
+AND treatment_needed = true
+THEN treatment = SSRIs_SNRIs AND Tricyclics
+
+//RULE 450
+IF diagnosis = Dysthymia
+AND treatment_needed = true
+THEN treatment = Psychotherapy AND Cognitive_Behavioral_Therapy
+
+//RULE 460
+IF diagnosis = Dysthymia
+AND treatment_needed = true
+THEN treatment = Long_term_coping_strategies AND Supportive_Therapy
