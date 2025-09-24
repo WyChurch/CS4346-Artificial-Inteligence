@@ -412,7 +412,160 @@ void ProcessDisorder(const string& disorderName, const vector<int>& disorderRule
     cout << "No rules for " << disorderName << " were satisfied." << endl;
 }
 
-//  Main function
+// ======================= FORWARD CHAINING =======================
+
+// data structures for FC
+vector<string> FC_DerivedConclusions;     // derived conclusion list
+queue<string> FC_GlobalConclusionQueue;   // global conclusion variable queue
+
+// search_cvl: find clause number for a given variable
+double search_cvl(string variable) {
+    if (ruleParser.getRuleCount() == 0) {
+        ruleParser.parseRulesFromFile("EXPERT SYSTEM RULES.cpp");
+    }
+
+    for (int i = 0; i < ruleParser.getRuleCount(); i++) {
+        RuleData rule = ruleParser.getRuleByIndex(i);
+        if (!rule.isActive) continue;
+
+        if (rule.ruleText.find("THEN") != string::npos) {
+            size_t thenPos = rule.ruleText.find("THEN");
+            string thenClause = rule.ruleText.substr(thenPos + 4);
+            thenClause.erase(remove(thenClause.begin(), thenClause.end(), ' '), thenClause.end());
+
+            // Look for variable on LHS of THEN
+            size_t eqPos = thenClause.find('=');
+            if (eqPos != string::npos) {
+                string varName = thenClause.substr(0, eqPos);
+                if (varName == variable) {
+                    return (i * 4) + 1;  // Clause numbers start at 1
+                }
+            }
+        }
+    }
+    return -1; // not found
+}
+
+// clause_to_rule: convert Clause number -> Rule number
+int clause_to_rule(int Ci) {
+    // Rules are numbered in steps of 10 (10, 20, 30…)
+    int Ri = ((Ci - 1) / 4 + 1) * 10;
+    return Ri;
+}
+
+// update_VL: instantiate variables from clause
+int update_VL(int Ci) {
+    int Ri = clause_to_rule(Ci);
+    RuleData rule = ruleParser.getRuleByNumber(Ri);
+    if (rule.ruleNumber == 0) return -1;
+
+    // extract IF part
+    size_t ifPos = rule.ruleText.find("IF");
+    size_t thenPos = rule.ruleText.find("THEN");
+    if (ifPos == string::npos || thenPos == string::npos) return -1;
+
+    string ifClause = rule.ruleText.substr(ifPos + 2, thenPos - ifPos - 2);
+
+    // split by AND
+    stringstream ss(ifClause);
+    string segment;
+    while (getline(ss, segment, 'A')) { // crude split on "AND"
+        size_t eqPos = segment.find('=');
+        if (eqPos != string::npos) {
+            string varName = segment.substr(0, eqPos);
+            string expectedValue = segment.substr(eqPos + 1);
+
+            // cleanup
+            varName.erase(remove(varName.begin(), varName.end(), ' '), varName.end());
+            expectedValue.erase(remove(expectedValue.begin(), expectedValue.end(), ' '), expectedValue.end());
+
+            // ask if not already known
+            if (derivedGlobalVariables.find(varName) == derivedGlobalVariables.end()) {
+                cout << "Is " << varName << " = " << expectedValue << "? (t/f): ";
+                char ans;
+                cin >> ans;
+                string val = (ans == 't' || ans == 'T') ? expectedValue : "false";
+                derivedGlobalVariables[varName] = val;
+            }
+        }
+    }
+    return 0;
+}
+
+// validate_Ri: check if IF-part of rule Ri is satisfied
+int validate_Ri(int Ri) {
+    RuleData rule = ruleParser.getRuleByNumber(Ri);
+    if (rule.ruleNumber == 0) return 0;
+
+    size_t ifPos = rule.ruleText.find("IF");
+    size_t thenPos = rule.ruleText.find("THEN");
+    if (ifPos == string::npos || thenPos == string::npos) return 0;
+
+    string ifClause = rule.ruleText.substr(ifPos + 2, thenPos - ifPos - 2);
+    string thenClause = rule.ruleText.substr(thenPos + 4);
+
+    // parse IF conditions
+    stringstream ss(ifClause);
+    string cond;
+    while (getline(ss, cond, 'A')) { // split on "AND"
+        size_t eqPos = cond.find('=');
+        if (eqPos != string::npos) {
+            string varName = cond.substr(0, eqPos);
+            string expectedValue = cond.substr(eqPos + 1);
+            varName.erase(remove(varName.begin(), varName.end(), ' '), varName.end());
+            expectedValue.erase(remove(expectedValue.begin(), expectedValue.end(), ' '), expectedValue.end());
+
+            if (derivedGlobalVariables.find(varName) == derivedGlobalVariables.end() ||
+                derivedGlobalVariables[varName] != expectedValue) {
+                return 0; // condition not satisfied
+            }
+        }
+    }
+
+    // IF satisfied then add conclusion
+    size_t eqPos = thenClause.find('=');
+    if (eqPos != string::npos) {
+        string conclVar = thenClause.substr(0, eqPos);
+        string conclVal = thenClause.substr(eqPos + 1);
+        conclVar.erase(remove(conclVar.begin(), conclVar.end(), ' '), conclVar.end());
+        conclVal.erase(remove(conclVal.begin(), conclVal.end(), ' '), conclVal.end());
+
+        string conclusionStr = conclVar + " = " + conclVal;
+        FC_DerivedConclusions.push_back(conclusionStr);
+        FC_GlobalConclusionQueue.push(conclVar);
+        derivedGlobalVariables[conclVar] = conclVal;
+    }
+    return 1;
+}
+
+// process: perform FC step for a variable
+void process(string variable) {
+    double Ci = search_cvl(variable);
+    if (Ci == -1) return;
+
+    update_VL((int)Ci);
+    int Ri = clause_to_rule((int)Ci);
+    validate_Ri(Ri);
+}
+
+// FC_main: driver
+void FC_main(string startVar) {
+    process(startVar);
+
+    while (!FC_GlobalConclusionQueue.empty()) {
+        string nextVar = FC_GlobalConclusionQueue.front();
+        FC_GlobalConclusionQueue.pop();
+        process(nextVar);
+    }
+
+    cout << "\n=== FORWARD CHAINING RESULTS ===\n";
+    for (auto& concl : FC_DerivedConclusions) {
+        cout << " - " << concl << endl;
+    }
+}
+// ======================= END FORWARD CHAINING =======================
+
+//  main function
 int main() {
     cout << "=== BACKWARD CHAINING EXPERT SYSTEM ===" << endl;
     
@@ -474,16 +627,19 @@ int main() {
     // Process only the selected disorder
     ProcessDisorder(selectedDisorder, disorderRules, ruleParser);
     
-    // Check if goal was determined
-    if (derivedGlobalVariables.find("diagnosis") != derivedGlobalVariables.end() && 
-        !derivedGlobalVariables["diagnosis"].empty()) {
-        cout << "\n=== FINAL RESULT ===" << endl;
-        cout << "SUCCESS: diagnosis = " << derivedGlobalVariables["diagnosis"] << endl;
-        cout << "This result can be passed to the Forward Chaining program." << endl;
-    } else {
-        cout << "\n=== FINAL RESULT ===" << endl;
-        cout << "FAILURE: Could not determine diagnosis for " << selectedDisorder << endl;
-    }
+if (derivedGlobalVariables.find("diagnosis") != derivedGlobalVariables.end() && 
+    !derivedGlobalVariables["diagnosis"].empty()) {
+    cout << "\n=== FINAL RESULT ===" << endl;
+    cout << "SUCCESS: diagnosis = " << derivedGlobalVariables["diagnosis"] << endl;
+
+    // Run Forward Chaining starting from diagnosis
+    FC_main("diagnosis");
+} else {
+    cout << "\n=== FINAL RESULT ===" << endl;
+    cout << "FAILURE: Could not determine diagnosis for " << selectedDisorder << endl;
+}
+
+
     
     // Display all derived variables
     cout << "\n=== ALL DERIVED VARIABLES ===" << endl;
