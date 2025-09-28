@@ -17,7 +17,7 @@ struct RuleData {
 // Enhanced automated rule management
 class ExpertSystemParser {
 private:
-    RuleData rules[50]; // Increased to accommodate all rules
+    RuleData rules[500]; // Increased to accommodate all rules
     int ruleCount;
     int nextRuleNumber;
     

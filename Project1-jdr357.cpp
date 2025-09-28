@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
+#include <queue>
 #include "ExpertSystemParser.h"
 using namespace std;
 
@@ -673,7 +674,8 @@ if (derivedGlobalVariables.find("diagnosis") != derivedGlobalVariables.end() &&
     cout << "SUCCESS: diagnosis = " << derivedGlobalVariables["diagnosis"] << endl;
 
     // Run Forward Chaining starting from diagnosis
-    //FC_main("diagnosis");
+    derivedGlobalVariables["treatment_needed"] = "true";
+    FC_main("diagnosis");
 } else {
     cout << "\n=== FINAL RESULT ===" << endl;
     cout << "FAILURE: Could not determine diagnosis for " << selectedDisorder << endl;

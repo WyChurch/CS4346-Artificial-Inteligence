@@ -43,10 +43,11 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
         if (line.find("//RULE") != string::npos) {
             // If we were already in a rule, complete it first
             if (inRule && !currentRule.empty()) {
-                if (ruleCount >= 46) {
-                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                if (ruleCount >= 500) {
+                    cout << "ERROR: Too many rules! Maximum is 500, but trying to add rule " << ruleCount + 1 << endl;
                     return false;
                 }
+
                 rules[ruleCount].ruleText = currentRule;
                 rules[ruleCount].isActive = true;
                 rules[ruleCount].ruleNumber = currentRuleNumber;
@@ -69,8 +70,8 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
         if (line.find("//") == 0 && line.find("RULE") == string::npos) {
             // If we were already in a rule, complete it first
             if (inRule && !currentRule.empty()) {
-                if (ruleCount >= 46) {
-                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                if (ruleCount >= 50) {
+                    cout << "ERROR: Too many rules! Maximum is 500, but trying to add rule " << ruleCount + 1 << endl;
                     return false;
                 }
                 rules[ruleCount].ruleText = currentRule;
@@ -101,8 +102,8 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
             } else if (line.find("THEN") != string::npos) {
                 currentRule += " " + line;
                 // Rule is complete, add it to our array
-                if (ruleCount >= 46) {
-                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                if (ruleCount >= 500) {
+                    cout << "ERROR: Too many rules! Maximum is 500, but trying to add rule " << ruleCount + 1 << endl;
                     return false;
                 }
                 rules[ruleCount].ruleText = currentRule;
@@ -126,8 +127,8 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
     
     // Complete the last rule if we were still in one
     if (inRule && !currentRule.empty()) {
-        if (ruleCount >= 46) {
-            cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+        if (ruleCount >= 500) {
+            cout << "ERROR: Too many rules! Maximum is 500, but trying to add rule " << ruleCount + 1 << endl;
             return false;
         }
         rules[ruleCount].ruleText = currentRule;
@@ -185,7 +186,7 @@ void ExpertSystemParser::displayRulesByCategory(const string& category) {
 
 // Add a new rule manually
 void ExpertSystemParser::addRule(string ruleText, string category) {
-    if (ruleCount < 46) {
+    if (ruleCount < 500) {
         rules[ruleCount].ruleText = ruleText;
         rules[ruleCount].isActive = true;
         rules[ruleCount].ruleNumber = nextRuleNumber;
