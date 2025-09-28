@@ -18,15 +18,6 @@ ExpertSystemParser ruleParser;         // Rule parser instance
 // Global variable to track which rules have been tried
 static int lastTriedRuleIndex = -1;
 
-// Function prototypes
-int search_con(string variable);
-int rule_to_clause(int Ri);
-void update_VL(int Ci);
-bool validate_Ri(int Ri, string& conclusion);
-void Process(string variable);
-void displayAvailableDisorders();
-void ProcessDisorder(const string& disorderName, const vector<int>& disorderRules, ExpertSystemParser& ruleParser);
-
 //====================== BACKWARD CHAINING =======================
 
 // search_con function - finds matching variable in conclusion list
@@ -654,7 +645,6 @@ int main() {
                 // Check for exact match only
                 if (diagnosisValue == cleanSelected) {
                     disorderRules.push_back(rule.ruleNumber);
-                    cout << "Found rule " << rule.ruleNumber << " for " << selectedDisorder << endl;
                 }
             }
         }
