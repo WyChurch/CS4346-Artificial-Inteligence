@@ -1,26 +1,26 @@
 //------DIAGNOSIS-------
 
-//SCHIZOPHRENIA
+// SCHIZOPHRENIA
 
 //RULE 10
 IF hallucinations = true
 AND delusions = true
 AND disorganized_speech = true
-THEN diagnosis = Schizophrenia
+THEN diagnosis = SCHIZOPHRENIA
 
 //RULE 20
 IF hallucinations = true 
 AND paranoia = true 
 AND unusual_motor_behavior = true
-THEN diagnosis = Schizophrenia
+THEN diagnosis = SCHIZOPHRENIA
 
 //RULE 30
 IF delusions = true 
 AND disorganized_behavior = true
 AND paranoia = true
-THEN diagnosis = Schizophrenia
+THEN diagnosis = SCHIZOPHRENIA
 
-//MAJOR DEPRESSIVE DISORDER
+// MAJOR DEPRESSIVE DISORDER
 
 //RULE 40
 IF anxiety = true
@@ -40,7 +40,7 @@ AND guilt = true
 AND weight_gain = true
 THEN diagnosis = MAJOR DEPRESSIVE DISORDER
 
-//PANIC DISORDER WITH AGORAPHOBIA
+// PANIC DISORDER WITH AGORAPHOBIA
 
 //RULE 70
 IF anxiety = true
@@ -56,7 +56,7 @@ AND fear_trapped = true
 AND helplessness = true
 THEN diagnosis = PANIC DISORDER WITH AGORAPHOBIA
 
-//BIPOLAR DISORDER
+// BIPOLAR DISORDER
 
 //RULE 90
 IF confused_thinking = true
@@ -79,7 +79,8 @@ AND psychosis = true
 AND anxiety = true
 THEN diagnosis = BIPOLAR DISORDER
 
-//GENERALIZED ANXIETY DISORDER
+
+// GENERALIZED ANXIETY DISORDER
 
 //RULE 120
 IF anxiety = true
@@ -102,7 +103,7 @@ AND panic_attacks = true
 AND hyper_vigilance = true
 THEN diagnosis = GENERALIZED ANXIETY DISORDER
 
-//SCHIZO-AFFECTIVE DISORDER
+// SCHIZO-AFFECTIVE DISORDER
 
 //RULE 150
 IF confused_thinking = true
@@ -122,7 +123,7 @@ AND agitated = true
 AND distractable = true
 THEN diagnosis = SCHIZO-AFFECTIVE DISORDER
 
-//DISSOCIATIVE IDENTITY DISORDER
+// DISSOCIATIVE IDENTITY DISORDER
 
 //RULE 180
 IF memory_loss = true
@@ -142,7 +143,7 @@ AND depression = true
 AND anxiety = true
 THEN diagnosis = DISSOCIATIVE IDENTITY DISORDER
 
-//DYSTHYMIA
+// DYSTHYMIA
 
 //RULE 210
 IF sadness = true

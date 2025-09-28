@@ -15,6 +15,9 @@ vector<string> clauseVariableList;    // Clause Variable List (44 elements)
 map<string, string> derivedGlobalVariables; // Derived Global Variable List
 ExpertSystemParser ruleParser;         // Rule parser instance
 
+// Global variable to track which rules have been tried
+static int lastTriedRuleIndex = -1;
+
 // Function prototypes
 int search_con(string variable);
 int rule_to_clause(int Ri);
@@ -24,12 +27,10 @@ void Process(string variable);
 void displayAvailableDisorders();
 void ProcessDisorder(const string& disorderName, const vector<int>& disorderRules, ExpertSystemParser& ruleParser);
 
-// Global variable to track which rules have been tried
-static int lastTriedRuleIndex = -1;
+//====================== BACKWARD CHAINING =======================
 
 // search_con function - finds matching variable in conclusion list
 int search_con(string variable) {
-    cout << "Searching for variable '" << variable << "' in conclusion list..." << endl;
     
     // Parse rules from file if not already done
     if (ruleParser.getRuleCount() == 0) {
@@ -49,7 +50,6 @@ int search_con(string variable) {
                 
                 // Check if variable matches conclusion
                 if (conclusion.find(variable) != string::npos) {
-                    cout << "Found variable '" << variable << "' in rule " << rule.ruleNumber << endl;
                     lastTriedRuleIndex = i;
                     return rule.ruleNumber;
                 }
@@ -62,11 +62,14 @@ int search_con(string variable) {
 }
 
 // rule_to_clause function - converts rule number to clause number
-// (Function is already defined in ExpertSystemParser.cpp)
+int rule_to_clause(int Ri) {
+    // Formula for rule numbers like 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230
+    // CLAUSE NUMBER (Ci) = Amount of rules * (RULE NUMBER / 10 - 1) + 1
+    return 4 * (Ri / 10 - 1) + 1;
+}
 
 // update_VL function - asks questions and instantiates variables
 void update_VL(int Ci) {
-    cout << "Updating Variable List starting from clause " << Ci << "..." << endl;
     
     // Get the rule corresponding to this clause
     int Ri = (Ci - 1) / 44 * 10 + 10; // Reverse calculation
@@ -128,9 +131,7 @@ void update_VL(int Ci) {
                     
                     string value = (answer == 't' || answer == 'T') ? "true" : "false";
                     derivedGlobalVariables[var] = value;
-                    cout << "Set " << var << " = " << value << endl;
                 } else {
-                    cout << var << " already set to " << derivedGlobalVariables[var] << endl;
                 }
             }
         }
@@ -139,11 +140,9 @@ void update_VL(int Ci) {
 
 // validate_Ri function - checks if rule conditions are satisfied
 bool validate_Ri(int Ri, string& conclusion) {
-    cout << "Validating rule " << Ri << "..." << endl;
     
     RuleData rule = ruleParser.getRuleByNumber(Ri);
     if (rule.ruleNumber == 0) {
-        cout << "Rule " << Ri << " not found." << endl;
         return false;
     }
     
@@ -221,8 +220,18 @@ bool validate_Ri(int Ri, string& conclusion) {
                 size_t diagPos = thenClause.find("diagnosis =");
                 if (diagPos != string::npos) {
                     conclusion = thenClause.substr(diagPos + 11);
-                    // Clean up conclusion
+                    // Clean up conclusion - remove spaces and any trailing characters
                     conclusion.erase(remove(conclusion.begin(), conclusion.end(), ' '), conclusion.end());
+                    // Remove any comment markers or extra text after the diagnosis
+                    size_t commentPos = conclusion.find("//");
+                    if (commentPos != string::npos) {
+                        conclusion = conclusion.substr(0, commentPos);
+                    }
+                    // Remove any trailing characters that aren't part of the diagnosis
+                    size_t endPos = conclusion.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ_");
+                    if (endPos != string::npos) {
+                        conclusion = conclusion.substr(0, endPos);
+                    }
                     cout << "Rule " << Ri << " validated. Conclusion: " << conclusion << endl;
                     return true;
                 }
@@ -230,13 +239,11 @@ bool validate_Ri(int Ri, string& conclusion) {
         }
     }
     
-    cout << "Rule " << Ri << " validation failed." << endl;
     return false;
 }
 
 // Process function - main backward chaining logic
 void Process(string variable) {
-    cout << "\n=== PROCESSING VARIABLE: " << variable << " ===" << endl;
     
     // Reset rule index for new variable
     lastTriedRuleIndex = -1;
@@ -281,7 +288,6 @@ void Process(string variable) {
         }
     }
     
-    cout << "Could not determine value for variable '" << variable << "'" << endl;
 }
 
 // Function to display all available disorders
@@ -324,10 +330,33 @@ void displayAvailableDisorders() {
         }
     }
     
+    // Helper function to add spaces to disorder names
+    auto addSpacesToDisorder = [](const string& disorder) -> string {
+        string result = disorder;
+        
+        // Add spaces before capital letters (except the first one)
+        for (int i = 1; i < result.length(); i++) {
+            if (isupper(result[i]) && islower(result[i-1])) {
+                result.insert(i, " ");
+                i++; // Skip the space we just added
+            }
+        }
+        
+        // Handle special cases
+        if (result == "BIPOLARDISORDER") return "BIPOLAR DISORDER";
+        if (result == "DISSOCIATIVEIDENTITYDISORDER") return "DISSOCIATIVE IDENTITY DISORDER";
+        if (result == "GENERALIZEDANXIETYDISORDER") return "GENERALIZED ANXIETY DISORDER";
+        if (result == "MAJORDEPRESSIVEDISORDER") return "MAJOR DEPRESSIVE DISORDER";
+        if (result == "PANICDISORDERWITHAGORAPHOBIA") return "PANIC DISORDER WITH AGORAPHOBIA";
+        if (result == "SCHIZO-AFFECTIVEDISORDER") return "SCHIZO-AFFECTIVE DISORDER";
+        
+        return result;
+    };
+    
     // Display disorders in a nice format
     int count = 1;
     for (const string& disorder : disorders) {
-        cout << count << ". " << disorder << endl;
+        cout << count << ". " << addSpacesToDisorder(disorder) << endl;
         count++;
     }
     
@@ -338,6 +367,8 @@ void displayAvailableDisorders() {
 // New function to process a specific disorder
 void ProcessDisorder(const string& disorderName, const vector<int>& disorderRules, ExpertSystemParser& ruleParser) {
     cout << "\n=== TESTING " << disorderName << " ===" << endl;
+    
+    bool anyRuleSatisfied = false;
     
     // Try each rule for this disorder
     for (int ruleNum : disorderRules) {
@@ -394,7 +425,6 @@ void ProcessDisorder(const string& disorderName, const vector<int>& disorderRule
                 
                 string value = (answer == 't' || answer == 'T') ? "true" : "false";
                 derivedGlobalVariables[var] = value;
-                cout << "Set " << var << " = " << value << endl;
             }
         }
         
@@ -403,13 +433,18 @@ void ProcessDisorder(const string& disorderName, const vector<int>& disorderRule
         if (validate_Ri(ruleNum, conclusion)) {
             cout << "SUCCESS: Rule " << ruleNum << " validated!" << endl;
             cout << "Diagnosis: " << conclusion << endl;
-            return; // Stop after first successful rule
+            // Set the diagnosis in global variables
+            derivedGlobalVariables["diagnosis"] = conclusion;
+            anyRuleSatisfied = true;
+            // Continue to test all rules instead of stopping
         } else {
             cout << "Rule " << ruleNum << " validation failed." << endl;
         }
     }
     
-    cout << "No rules for " << disorderName << " were satisfied." << endl;
+    if (!anyRuleSatisfied) {
+        cout << "No rules for " << disorderName << " were satisfied." << endl;
+    }
 }
 
 // ======================= FORWARD CHAINING =======================
@@ -453,8 +488,8 @@ int clause_to_rule(int Ci) {
     return Ri;
 }
 
-// update_VL: instantiate variables from clause
-int update_VL(int Ci) {
+// update_VL_FC: instantiate variables from clause (Forward Chaining version)
+int update_VL_FC(int Ci) {
     int Ri = clause_to_rule(Ci);
     RuleData rule = ruleParser.getRuleByNumber(Ri);
     if (rule.ruleNumber == 0) return -1;
@@ -543,7 +578,7 @@ void process(string variable) {
     double Ci = search_cvl(variable);
     if (Ci == -1) return;
 
-    update_VL((int)Ci);
+    update_VL_FC((int)Ci);
     int Ri = clause_to_rule((int)Ci);
     validate_Ri(Ri);
 }
@@ -586,7 +621,6 @@ int main() {
     // Ask user to select a specific disorder to test
     string selectedDisorder;
     cout << "\nEnter the disorder you want to test (e.g., 'BIPOLAR DISORDER'): ";
-    cin.ignore(); // Clear the input buffer
     getline(cin, selectedDisorder);
     
     // Convert to uppercase for comparison
@@ -601,8 +635,24 @@ int main() {
             size_t thenPos = rule.ruleText.find("THEN");
             if (thenPos != string::npos) {
                 string conclusion = rule.ruleText.substr(thenPos + 4);
-                // Check if the conclusion contains the selected disorder
-                if (conclusion.find(selectedDisorder) != string::npos) {
+                // Convert conclusion to uppercase for case-insensitive comparison
+                transform(conclusion.begin(), conclusion.end(), conclusion.begin(), ::toupper);
+                
+                // Extract just the diagnosis value (after "diagnosis =")
+                string diagnosisValue = "";
+                size_t diagPos = conclusion.find("DIAGNOSIS =");
+                if (diagPos != string::npos) {
+                    diagnosisValue = conclusion.substr(diagPos + 11);
+                    // Remove spaces from diagnosis value
+                    diagnosisValue.erase(remove(diagnosisValue.begin(), diagnosisValue.end(), ' '), diagnosisValue.end());
+                }
+                
+                // Remove spaces from selected disorder
+                string cleanSelected = selectedDisorder;
+                cleanSelected.erase(remove(cleanSelected.begin(), cleanSelected.end(), ' '), cleanSelected.end());
+                
+                // Check for exact match only
+                if (diagnosisValue == cleanSelected) {
                     disorderRules.push_back(rule.ruleNumber);
                     cout << "Found rule " << rule.ruleNumber << " for " << selectedDisorder << endl;
                 }
@@ -633,7 +683,7 @@ if (derivedGlobalVariables.find("diagnosis") != derivedGlobalVariables.end() &&
     cout << "SUCCESS: diagnosis = " << derivedGlobalVariables["diagnosis"] << endl;
 
     // Run Forward Chaining starting from diagnosis
-    FC_main("diagnosis");
+    //FC_main("diagnosis");
 } else {
     cout << "\n=== FINAL RESULT ===" << endl;
     cout << "FAILURE: Could not determine diagnosis for " << selectedDisorder << endl;

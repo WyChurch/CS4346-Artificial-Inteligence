@@ -17,7 +17,7 @@ struct RuleData {
 // Enhanced automated rule management
 class ExpertSystemParser {
 private:
-    RuleData rules[44]; // Your 44-element array
+    RuleData rules[50]; // Increased to accommodate all rules
     int ruleCount;
     int nextRuleNumber;
     
@@ -52,8 +52,6 @@ public:
     void setNextRuleNumber(int number);
 };
 
-// Rule-to-clause conversion function
-int rule_to_clause(int Ri);
 
 // Function to demonstrate parsing from your expert system file
 void demonstrateExpertSystemParsing();

@@ -43,6 +43,10 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
         if (line.find("//RULE") != string::npos) {
             // If we were already in a rule, complete it first
             if (inRule && !currentRule.empty()) {
+                if (ruleCount >= 46) {
+                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                    return false;
+                }
                 rules[ruleCount].ruleText = currentRule;
                 rules[ruleCount].isActive = true;
                 rules[ruleCount].ruleNumber = currentRuleNumber;
@@ -61,6 +65,33 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
             continue;
         }
         
+        // Check for category comments (like "// GENERALIZED ANXIETY DISORDER")
+        if (line.find("//") == 0 && line.find("RULE") == string::npos) {
+            // If we were already in a rule, complete it first
+            if (inRule && !currentRule.empty()) {
+                if (ruleCount >= 46) {
+                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                    return false;
+                }
+                rules[ruleCount].ruleText = currentRule;
+                rules[ruleCount].isActive = true;
+                rules[ruleCount].ruleNumber = currentRuleNumber;
+                rules[ruleCount].category = currentCategory;
+                ruleCount++;
+                inRule = false;
+                currentRule = "";
+            }
+            
+            // Update category
+            currentCategory = line.substr(2); // Remove "//"
+            // Clean up category name
+            size_t pos = currentCategory.find_last_not_of(" \t\r\n");
+            if (pos != string::npos) {
+                currentCategory = currentCategory.substr(0, pos + 1);
+            }
+            continue;
+        }
+        
         // If in a rule, collect the rule text
         if (inRule) {
             if (line.find("IF") != string::npos) {
@@ -70,27 +101,35 @@ bool ExpertSystemParser::parseRulesFromFile(const string& filename) {
             } else if (line.find("THEN") != string::npos) {
                 currentRule += " " + line;
                 // Rule is complete, add it to our array
+                if (ruleCount >= 46) {
+                    cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+                    return false;
+                }
                 rules[ruleCount].ruleText = currentRule;
                 rules[ruleCount].isActive = true;
                 rules[ruleCount].ruleNumber = currentRuleNumber;
                 rules[ruleCount].category = currentCategory;
+                
+                
                 ruleCount++;
                 inRule = false;
                 currentRule = "";
                 // Stop processing this line and move to next
                 continue;
-            } else if (!line.empty() && line.find("//") == string::npos && line.find("IF") == string::npos) {
+            } else if (!line.empty() && line.find("//") == string::npos && line.find("IF") == string::npos && line.find("RULE") == string::npos) {
                 // This is a continuation line (like IF on next line)
-                // But only if it's not a comment line
-                if (line.find("//") == string::npos) {
-                    currentRule += " " + line;
-                }
+                // But only if it's not a comment line, IF line, or RULE line
+                currentRule += " " + line;
             }
         }
     }
     
     // Complete the last rule if we were still in one
     if (inRule && !currentRule.empty()) {
+        if (ruleCount >= 46) {
+            cout << "ERROR: Too many rules! Maximum is 50, but trying to add rule " << ruleCount + 1 << endl;
+            return false;
+        }
         rules[ruleCount].ruleText = currentRule;
         rules[ruleCount].isActive = true;
         rules[ruleCount].ruleNumber = currentRuleNumber;
@@ -146,7 +185,7 @@ void ExpertSystemParser::displayRulesByCategory(const string& category) {
 
 // Add a new rule manually
 void ExpertSystemParser::addRule(string ruleText, string category) {
-    if (ruleCount < 44) {
+    if (ruleCount < 46) {
         rules[ruleCount].ruleText = ruleText;
         rules[ruleCount].isActive = true;
         rules[ruleCount].ruleNumber = nextRuleNumber;
@@ -161,12 +200,6 @@ void ExpertSystemParser::setNextRuleNumber(int number) {
     nextRuleNumber = number;
 }
 
-// Rule to clause conversion function
-int rule_to_clause(int Ri) {
-    // Formula for rule numbers like 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230
-    // CLAUSE NUMBER (Ci) = 4 * (RULE NUMBER / 10 - 1) + 1
-    return 4 * (Ri / 10 - 1) + 1;
-}
 
 // Test function to demonstrate usage
 void demonstrateExpertSystemParsing() {
@@ -182,13 +215,7 @@ void demonstrateExpertSystemParsing() {
         cout << "\n=== ALL RULES ===" << endl;
         parser.displayRules();
         
-        // Test rule_to_clause function
-        cout << "\n=== RULE TO CLAUSE CONVERSION ===" << endl;
-        for (int i = 0; i < parser.getRuleCount(); i++) {
-            RuleData rule = parser.getRuleByIndex(i);
-            int clauseNumber = rule_to_clause(rule.ruleNumber);
-            cout << "Rule " << rule.ruleNumber << " -> Clause " << clauseNumber << endl;
-        }
+        // Note: rule_to_clause function is now in Project1-jdr357.cpp
         
     } else {
         cout << "Failed to parse rules from file!" << endl;
