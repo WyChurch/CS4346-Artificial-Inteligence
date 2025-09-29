@@ -12,7 +12,7 @@ using namespace std;
 // Global data structures for backward chaining
 vector<string> variableList;           // Variable List
 vector<string> conclusionList;        // Conclusion List  
-vector<string> clauseVariableList;    // Clause Variable List (44 elements)
+vector<string> clauseVariableList;    // Clause Variable List (46 elements)
 map<string, string> derivedGlobalVariables; // Derived Global Variable List
 ExpertSystemParser ruleParser;         // Rule parser instance
 
@@ -356,7 +356,7 @@ void displayAvailableDisorders() {
     cout << "==========================================" << endl;
 }
 
-// New function to process a specific disorder
+// Function to process a specific disorder
 void ProcessDisorder(const string& disorderName, const vector<int>& disorderRules, ExpertSystemParser& ruleParser) {
     cout << "\n=== TESTING " << disorderName << " ===" << endl;
     
