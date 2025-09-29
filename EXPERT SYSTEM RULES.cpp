@@ -260,16 +260,29 @@ THEN treatment = Support_systems
 //GENERALIZED ANXIETY DISORDER
 
 //RULE 280
-IF diagnosis = GENERALIZED ANXIETY DISORDER AND treatment_needed = true
+IF diagnosis = GENERALIZEDANXIETYDISORDER
+AND treatment_needed = true
 THEN treatment = SSRIs_SNRIs
 
 //RULE 281
-IF diagnosis = GENERALIZED ANXIETY DISORDER AND treatment_needed = true
+IF diagnosis = GENERALIZEDANXIETYDISORDER
+AND treatment_needed = true
 THEN treatment = Buspirone
 
 //RULE 282
-IF diagnosis = GENERALIZED ANXIETY DISORDER AND treatment_needed = true
+IF diagnosis = GENERALIZEDANXIETYDISORDER
+AND treatment_needed = true
 THEN treatment = Stress_reduction_techniques
+
+//RULE 283
+IF diagnosis = GENERALIZEDANXIETYDISORDER
+AND treatment_needed = true
+THEN treatment = CBT
+
+//RULE 284
+IF diagnosis = GENERALIZEDANXIETYDISORDER
+AND treatment_needed = true
+THEN treatment = Relaxation_Therapy
 
 //SCHIZO-AFFECTIVE DISORDER
 

@@ -577,17 +577,50 @@ void process(string variable) {
 
 // FC_main: driver
 void FC_main(string startVar) {
-    process(startVar);
+    string diagValue = derivedGlobalVariables["diagnosis"];
 
-    while (!FC_GlobalConclusionQueue.empty()) {
-        string nextVar = FC_GlobalConclusionQueue.front();
-        FC_GlobalConclusionQueue.pop();
-        process(nextVar);
+    cout << "\n=== FORWARD CHAINING STARTED FOR: " << diagValue << " ===\n";
+
+    for (int i = 0; i < ruleParser.getRuleCount(); i++) {
+        RuleData rule = ruleParser.getRuleByIndex(i);
+        if (!rule.isActive) continue;
+
+        // Only check treatment rules (they contain "treatment =" in THEN)
+        if (rule.ruleText.find("treatment") == string::npos) continue;
+
+        // Must contain the current diagnosis in IF clause
+        if (rule.ruleText.find("IF diagnosis = " + diagValue) != string::npos) {
+            // Validate rule
+            size_t thenPos = rule.ruleText.find("THEN");
+            if (thenPos != string::npos) {
+                string thenClause = rule.ruleText.substr(thenPos + 4);
+                size_t eqPos = thenClause.find('=');
+                if (eqPos != string::npos) {
+                    string conclVar = thenClause.substr(0, eqPos);
+                    string conclVal = thenClause.substr(eqPos + 1);
+
+                    // Cleanup
+                    conclVar.erase(remove(conclVar.begin(), conclVar.end(), ' '), conclVar.end());
+                    conclVal.erase(remove(conclVal.begin(), conclVal.end(), ' '), conclVal.end());
+
+                    string conclusionStr = conclVar + " = " + conclVal;
+
+                    if (find(FC_DerivedConclusions.begin(), FC_DerivedConclusions.end(), conclusionStr) == FC_DerivedConclusions.end()) {
+                        FC_DerivedConclusions.push_back(conclusionStr);
+                        derivedGlobalVariables[conclVar] = conclVal;
+                    }
+                }
+            }
+        }
     }
 
     cout << "\n=== FORWARD CHAINING RESULTS ===\n";
-    for (auto& concl : FC_DerivedConclusions) {
-        cout << " - " << concl << endl;
+    if (FC_DerivedConclusions.empty()) {
+        cout << "No treatments found for " << diagValue << endl;
+    } else {
+        for (auto& concl : FC_DerivedConclusions) {
+            cout << " - " << concl << endl;
+        }
     }
 }
 // ======================= END FORWARD CHAINING =======================
