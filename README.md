@@ -12,3 +12,46 @@ It uses a **Backward Chaining (BC)** engine to determine the diagnosis based on 
 ### How to compile the backwards chaining
 g++ -o expert_system Project1-jdr357.cpp ExpertSystemParser.cpp
 ./expert_system
+
+## File Structure
+├── Project1-jdr357.cpp # Main driver program (Backward & Forward chaining)
+├── ExpertSystemParser.cpp # Parser implementation
+├── ExpertSystemParser.h # Parser header
+├── EXPERT SYSTEM RULES.cpp # Knowledge base (diagnosis + treatment rules)
+├── README.md # This file
+
+## Running the Program
+=== BACKWARD CHAINING EXPERT SYSTEM ===
+Initializing data structures...
+Successfully loaded XX rules.
+
+=== AVAILABLE DISORDERS FOR DIAGNOSIS ===
+1. BIPOLAR DISORDER
+2. DISSOCIATIVE IDENTITY DISORDER
+3. DYSTHYMIA
+4. GENERALIZED ANXIETY DISORDER
+5. MAJOR DEPRESSIVE DISORDER
+6. PANIC DISORDER WITH AGORAPHOBIA
+7. SCHIZO-AFFECTIVE DISORDER
+8. SCHIZOPHRENIA
+
+Enter the disorder you want to test (e.g., 'BIPOLAR DISORDER'):
+
+Example Run (DYSTHYMIA)
+
+Enter DYSTHYMIA.
+
+The system will ask symptom questions (sadness, loss_of_interest, etc.).
+
+Once enough conditions are satisfied, BC derives:
+
+=== FINAL RESULT ===
+SUCCESS: diagnosis = DYSTHYMIA
+
+=== FORWARD CHAINING RESULTS ===
+ - treatment = SSRIs_SNRIs
+ - treatment = Tricyclics
+ - treatment = Psychotherapy
+ - treatment = Cognitive_Behavioral_Therapy
+ - treatment = Long_term_coping_strategies
+ - treatment = Supportive_Therapy
